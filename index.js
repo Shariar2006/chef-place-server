@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config()
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000
 
@@ -29,6 +30,13 @@ async function run() {
         //DB collection
         const menuCollection = client.db('chef-place').collection('allMeals')
 
+        //jwt token
+        app.post('/jwt', async (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+            console.log(token)
+            res.send(token)
+        })
 
         //all meals
         app.get('/allMeals', async (req, res) => {
@@ -36,12 +44,16 @@ async function run() {
             res.send(result)
         })
 
+        //single meal
         app.get('/meal/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
             const result = await menuCollection.findOne(query)
             res.send(result)
         })
+
+        //user info
+        
 
 
         await client.connect();
