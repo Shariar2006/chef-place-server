@@ -31,6 +31,7 @@ async function run() {
         const menuCollection = client.db('chef-place').collection('allMeals')
         const userCollection = client.db('chef-place').collection('user')
         const cartCollection = client.db('chef-place').collection('cart')
+        const reviewCollection = client.db('chef-place').collection('review')
 
         //jwt token
         app.post('/jwt', async (req, res) => {
@@ -66,7 +67,7 @@ async function run() {
         })
 
 
-        //cart 
+        //add to cart 
         app.post('/carts', async (req, res) => {
             const cartItem = req.body;
             const result = await cartCollection.insertOne(cartItem)
@@ -86,6 +87,15 @@ async function run() {
             const result = await cartCollection.deleteOne(query)
             res.send(result)
         })
+
+        //add a review 
+        app.post('/review', async (req, res) => {
+            const cartItem = req.body;
+            const result = await reviewCollection.insertOne(cartItem)
+            res.send(result)
+        })
+
+        
 
 
         await client.connect();
