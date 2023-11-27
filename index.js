@@ -30,6 +30,7 @@ async function run() {
         //DB collection
         const menuCollection = client.db('chef-place').collection('allMeals')
         const userCollection = client.db('chef-place').collection('user')
+        const cartCollection = client.db('chef-place').collection('cart')
 
         //jwt token
         app.post('/jwt', async (req, res) => {
@@ -53,14 +54,36 @@ async function run() {
         })
 
         //user info
-        app.post('/users', async(req, res) => {
+        app.post('/users', async (req, res) => {
             const user = req.body
             const query = { email: user.email };
             const existingUser = await userCollection.findOne(query)
-            if(existingUser){
+            if (existingUser) {
                 return res.send({ message: 'user already exists' })
             }
             const result = await userCollection.insertOne(user)
+            res.send(result)
+        })
+
+
+        //cart 
+        app.post('/carts', async (req, res) => {
+            const cartItem = req.body;
+            const result = await cartCollection.insertOne(cartItem)
+            res.send(result)
+        })
+
+        app.get('/carts', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email }
+            const result = await cartCollection.find(query).toArray()
+            res.send(result)
+        })
+
+        app.delete('/carts/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await cartCollection.deleteOne(query)
             res.send(result)
         })
 
