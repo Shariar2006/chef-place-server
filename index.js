@@ -35,19 +35,19 @@ async function run() {
 
 
         //middleware 
-        // const verifyToken = (req,res,next)=>{
-        //     if(!req.headers.authorization){
-        //         return res.status(401).send({ message: 'forbidden access' })
-        //     }
-        //     const token = req.headers.authorization.split(' ')[1]
-        //     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decode)=>{
-        //         if(error){
-        //             return res.status(401).send({ message: 'forbidden access' })
-        //         }
-        //         req.decode = decode
-        //         next()
-        //     })
-        // }
+        const verifyToken = (req,res,next)=>{
+            if(!req.headers.authorization){
+                return res.status(401).send({ message: 'forbidden access' })
+            }
+            const token = req.headers.authorization.split(' ')[1]
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decode)=>{
+                if(error){
+                    return res.status(401).send({ message: 'forbidden access' })
+                }
+                req.decode = decode
+                next()
+            })
+        }
 
 
         //jwt token
@@ -80,6 +80,13 @@ async function run() {
                 return res.send({ message: 'user already exists' })
             }
             const result = await userCollection.insertOne(user)
+            res.send(result)
+        })
+
+        app.get('/users',  async (req, res) => {
+            const email = req.query.email;
+            const query = {email: email}
+            const result = await userCollection.find(query).toArray()
             res.send(result)
         })
 
