@@ -58,7 +58,7 @@ async function run() {
         })
 
         //all meals
-        app.get('/allMeals', verifyToken, async (req, res) => {
+        app.get('/allMeals',  async (req, res) => {
             const result = await menuCollection.find().toArray()
             res.send(result)
         })
@@ -83,9 +83,25 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/allUsers', async(req,res)=>{
+        app.get('/allUsers', verifyToken, async(req,res)=>{
             const result = await userCollection.find().toArray()
             res.send(result)
+        })
+
+        //check admin
+        app.get('/user/admin/:email', verifyToken, async(req, res)=>{
+            const email = req.params.email;
+            if(email !== req.decode.email){
+                return res.status(403).send({message: 'unauthorize access'})
+            }
+
+            const query = {email: email}
+            const user = await userCollection.findOne(query)
+            let admin = false;
+            if(user){
+                admin = user?.role === 'admin'
+            }
+            res.send({admin})
         })
 
         app.delete('/users/:id', async(req, res)=>{
@@ -95,6 +111,7 @@ async function run() {
             res.send(result)
         })
 
+        //make admin
         app.patch('/users/:id', async(req, res)=>{
             const id = req.params.id
             const filter = {_id: new ObjectId(id)}
