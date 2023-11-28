@@ -33,6 +33,23 @@ async function run() {
         const cartCollection = client.db('chef-place').collection('cart')
         const reviewCollection = client.db('chef-place').collection('review')
 
+
+        //middleware 
+        // const verifyToken = (req,res,next)=>{
+        //     if(!req.headers.authorization){
+        //         return res.status(401).send({ message: 'forbidden access' })
+        //     }
+        //     const token = req.headers.authorization.split(' ')[1]
+        //     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decode)=>{
+        //         if(error){
+        //             return res.status(401).send({ message: 'forbidden access' })
+        //         }
+        //         req.decode = decode
+        //         next()
+        //     })
+        // }
+
+
         //jwt token
         app.post('/jwt', async (req, res) => {
             const user = req.body;
@@ -95,7 +112,32 @@ async function run() {
             res.send(result)
         })
 
-        
+        app.get('/review', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email }
+            const result = await reviewCollection.find(query).toArray()
+            res.send(result)
+        })
+
+        app.patch('/review/:id', async(req, res)=>{
+            const item = req.body;
+            const id = req.params.id;
+            const filter = {_id: new ObjectId(id)};
+            const updateDoc = {
+                $set:{
+                    review: item.review
+                }
+            }
+            const result = await reviewCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
+
+        app.delete('/review/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await reviewCollection.deleteOne(query)
+            res.send(result)
+        })
 
 
         await client.connect();
