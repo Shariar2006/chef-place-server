@@ -88,6 +88,16 @@ async function run() {
             res.send(result)
           })
 
+          app.post('/meal/:id', async (req, res) => {
+            const item = req.body;
+            const id = req.params.id
+            if(item.id == id){
+                console.log(item.id)
+                const result = await menuCollection.insertOne(item)
+                res.send(result)
+            }
+        })
+
         //single meal
         app.get('/meal/:id', async (req, res) => {
             const id = req.params.id
