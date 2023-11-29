@@ -32,6 +32,7 @@ async function run() {
         const userCollection = client.db('chef-place').collection('user')
         const cartCollection = client.db('chef-place').collection('cart')
         const reviewCollection = client.db('chef-place').collection('review')
+        const upcomingCollection = client.db('chef-place').collection('upcoming')
 
 
         //middleware 
@@ -75,6 +76,18 @@ async function run() {
             res.send(result)
         })
 
+        //upcoming meals
+        app.get('/upcomingMeal', async (req, res) => {
+            const result = await upcomingCollection.find().toArray()
+            res.send(result)
+        })
+
+        app.post('/upcomingMeal', async (req, res) => {
+            const item = req.body;
+            const result = await upcomingCollection.insertOne(item);
+            res.send(result)
+          })
+
         //single meal
         app.get('/meal/:id', async (req, res) => {
             const id = req.params.id
@@ -95,7 +108,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/allUsers', verifyToken, verifyAdmin, async (req, res) => {
+        app.get('/allUsers',  async (req, res) => {
             const result = await userCollection.find().toArray()
             res.send(result)
         })
@@ -103,6 +116,7 @@ async function run() {
         //check admin
         app.get('/user/admin/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
+            console.log(email, req.decode.email)
             if (email !== req.decode.email) {
                 return res.status(403).send({ message: 'unauthorize access' })
             }
@@ -116,7 +130,7 @@ async function run() {
             res.send({ admin })
         })
 
-        app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
+        app.delete('/users/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
             const result = await userCollection.deleteOne(query)
@@ -124,7 +138,7 @@ async function run() {
         })
 
         //make admin
-        app.patch('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
+        app.patch('/users/:id', async (req, res) => {
             const id = req.params.id
             const filter = { _id: new ObjectId(id) }
             const updateDoc = {
@@ -152,7 +166,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/carts', verifyToken, async (req, res) => {
+        app.get('/carts', async (req, res) => {
             const email = req.query.email;
             const query = { email: email }
             const result = await cartCollection.find(query).toArray()
