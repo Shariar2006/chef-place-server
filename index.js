@@ -76,26 +76,40 @@ async function run() {
             res.send(result)
         })
 
+        app.post('/meal/:id', async (req, res) => {
+            const item = req.body;
+            const id = req.params.id
+            if (item.id == id) {
+                console.log(item.id)
+                const result = await menuCollection.insertOne(item)
+                res.send(result)
+            }
+        })
+
+        app.delete('/meals/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await menuCollection.deleteOne(query)
+            res.send(result)
+        })
+
         //upcoming meals
+        app.post('/upcomingMeal', async (req, res) => {
+            const item = req.body;
+            const result = await upcomingCollection.insertOne(item);
+            res.send(result)
+        })
+
         app.get('/upcomingMeal', async (req, res) => {
             const result = await upcomingCollection.find().toArray()
             res.send(result)
         })
 
-        app.post('/upcomingMeal', async (req, res) => {
-            const item = req.body;
-            const result = await upcomingCollection.insertOne(item);
-            res.send(result)
-          })
-
-          app.post('/meal/:id', async (req, res) => {
-            const item = req.body;
+        app.delete('/upcomingMeal/:id', async (req, res) => {
             const id = req.params.id
-            if(item.id == id){
-                console.log(item.id)
-                const result = await menuCollection.insertOne(item)
-                res.send(result)
-            }
+            const query = { _id: new ObjectId(id) }
+            const result = await upcomingCollection.deleteOne(query)
+            res.send(result)
         })
 
         //single meal
@@ -118,7 +132,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/allUsers',  async (req, res) => {
+        app.get('/allUsers', async (req, res) => {
             const result = await userCollection.find().toArray()
             res.send(result)
         })
