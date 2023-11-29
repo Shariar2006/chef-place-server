@@ -86,6 +86,29 @@ async function run() {
             }
         })
 
+        app.patch('/meal/:id', async (req, res) => {
+            const item = req.body;
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    name: item.name,
+                    recipe: item.recipe,
+                    meal_distributor: item.meal_distributor,
+                    email: item.email,
+                    category: item.category,
+                    rating: item.rating,
+                    description: item.description,
+                    posted_time: item.posted_time,
+                    posted_date: item.posted_date,
+                    price: item.price,
+                    image: item.image
+                }
+            }
+            const result = await menuCollection.updateOne(filter, updatedDoc)
+            res.send(result)
+        })
+
         app.delete('/meals/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
@@ -214,7 +237,7 @@ async function run() {
             res.send(result)
         })
 
-        app.delete('/carts/:id', verifyToken, async (req, res) => {
+        app.delete('/carts/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await cartCollection.deleteOne(query)
@@ -222,7 +245,7 @@ async function run() {
         })
 
         //add a review 
-        app.post('/review', verifyToken, async (req, res) => {
+        app.post('/review', async (req, res) => {
             const cartItem = req.body;
             const result = await reviewCollection.insertOne(cartItem)
             res.send(result)
@@ -235,7 +258,7 @@ async function run() {
             res.send(result)
         })
 
-        app.patch('/review/:id', verifyToken, async (req, res) => {
+        app.patch('/review/:id', async (req, res) => {
             const item = req.body;
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
@@ -265,7 +288,7 @@ async function run() {
         //     res.send(result)
         // })
 
-        app.delete('/review/:id', verifyToken, async (req, res) => {
+        app.delete('/review/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await reviewCollection.deleteOne(query)
