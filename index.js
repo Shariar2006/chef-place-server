@@ -244,7 +244,7 @@ async function run() {
         //                 badge: badge
         //             }
         //         }
-        //         const result = await userCollection.updateOne(updateDoc)
+        //         const result = await userCollection.updateOne(query, updateDoc)
         //         res.send(result)
         //     }
         // })
@@ -320,16 +320,18 @@ async function run() {
         app.post('/create-payment-intent', async (req, res) => {
             const { price } = req.body;
             const amount = parseInt(price * 100)
-            console.log('first', amount)
-            const paymentIntent = await stripe.paymentIntents.create({
-                amount: amount,
-                currency: "usd",
-                payment_method_types: ['card']
-            });
-
-            res.send({
-                clientSecret: paymentIntent.client_secret
-            })
+            console.log('first', price)
+            if(amount){
+                const paymentIntent = await stripe.paymentIntents.create({
+                        amount: amount,
+                        currency: "usd",
+                        payment_method_types: ['card']
+                    });
+        
+                    res.send({
+                        clientSecret: paymentIntent.client_secret
+                    })
+            }
 
         })
 
