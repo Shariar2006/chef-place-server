@@ -74,8 +74,13 @@ async function run() {
 
         //all meals
         app.get('/allMeals', async (req, res) => {
-            const result = await menuCollection.find().toArray()
-            res.send(result)
+            try {
+                const result = await menuCollection.find().toArray()
+                res.send(result)
+            }
+            catch (error) {
+                res.send({ error: true, message: error.message });
+            }
         })
 
         app.get('/mealDistributor', async (req, res) => {
