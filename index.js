@@ -4,6 +4,7 @@ const cors = require('cors');
 require('dotenv').config()
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 const port = process.env.PORT || 5000
 
 //middle ware 
@@ -33,6 +34,7 @@ async function run() {
         const cartCollection = client.db('chef-place').collection('cart')
         const reviewCollection = client.db('chef-place').collection('review')
         const upcomingCollection = client.db('chef-place').collection('upcoming')
+        const packageCollection = client.db('chef-place').collection('packageData')
 
 
         //middleware 
@@ -73,6 +75,13 @@ async function run() {
         //all meals
         app.get('/allMeals', async (req, res) => {
             const result = await menuCollection.find().toArray()
+            res.send(result)
+        })
+
+        app.get('/mealDistributor', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email }
+            const result = await menuCollection.find(query).toArray()
             res.send(result)
         })
 
@@ -143,6 +152,19 @@ async function run() {
             res.send(result)
         })
 
+        //package information 
+        app.get('/memberShip', async (req, res) => {
+            const result = await packageCollection.find().toArray()
+            res.send(result)
+        })
+
+        app.get('/checkOut/:badge', async (req, res) => {
+            const badge = req.params.badge
+            const query = { badge: badge }
+            const result = await packageCollection.findOne(query)
+            res.send(result)
+        })
+
         //user info
         app.post('/users', async (req, res) => {
             const user = req.body
@@ -204,6 +226,23 @@ async function run() {
             const result = await userCollection.find(query).toArray()
             res.send(result)
         })
+
+        // app.patch('/userBadge', async(req, res)=>{
+        //     const badge = req.body;
+        //     const email = req.body.email
+        //     const query = {email: email}
+        //     const filterUser = await userCollection.findOne(query)
+        //     const findEmail = filterUser.email
+        //     if(email === findEmail){
+        //         const updateDoc = {
+        //             $set: {
+        //                 badge: badge
+        //             }
+        //         }
+        //         const result = await userCollection.updateOne(updateDoc)
+        //         res.send(result)
+        //     }
+        // })
 
 
         //add to cart 
@@ -272,21 +311,22 @@ async function run() {
         })
 
 
-        // app.get('/menuReview', async (req, res) => {
-        //     const result = await reviewCollection.aggregate([
-        //         {
-        //             $unwind: '$_id'
-        //         },
-        //         {
-        //             $group: {
-        //                 _id: '$_id.menuId',
-        //                 quantity: { $sum: 1 },
-        //             }
-        //         },
+        //payment intent
+        app.post('/create-payment-intent', async (req, res) => {
+            const { price } = req.body;
+            const amount = parseInt(price * 100)
+            console.log('first', amount)
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: "usd",
+                payment_method_types: ['card']
+            });
 
-        //     ]).toArray()
-        //     res.send(result)
-        // })
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            })
+
+        })
 
         app.delete('/review/:id', async (req, res) => {
             const id = req.params.id;
@@ -296,10 +336,10 @@ async function run() {
         })
 
 
-        await client.connect();
+        // await client.connect();
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        // await client.db("admin").command({ ping: 1 });
+        // console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
