@@ -232,22 +232,22 @@ async function run() {
             res.send(result)
         })
 
-        // app.patch('/userBadge', async(req, res)=>{
-        //     const badge = req.body;
-        //     const email = req.body.email
-        //     const query = {email: email}
-        //     const filterUser = await userCollection.findOne(query)
-        //     const findEmail = filterUser.email
-        //     if(email === findEmail){
-        //         const updateDoc = {
-        //             $set: {
-        //                 badge: badge
-        //             }
-        //         }
-        //         const result = await userCollection.updateOne(query, updateDoc)
-        //         res.send(result)
-        //     }
-        // })
+        app.patch('/userBadge', async(req, res)=>{
+            const badge = req.body;
+            const email = req.body.email
+            const query = {email: email}
+            const filterUser = await userCollection.findOne(query)
+            const findEmail = filterUser.email
+            if(email === findEmail){
+                const updateDoc = {
+                    $set: {
+                        badge: badge
+                    }
+                }
+                const result = await userCollection.updateOne(query, updateDoc)
+                res.send(result)
+            }
+        })
 
 
         //add to cart 
