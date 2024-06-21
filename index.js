@@ -75,13 +75,23 @@ async function run() {
         //all meals
         app.get('/allMeals', async (req, res) => {
             try {
-                const result = await menuCollection.find().toArray()
+                const page = parseInt(req.query.page);
+                const size = parseInt(req.query.size);
+                const result = await menuCollection.find()
+                .skip(page * size)
+                .limit(size)
+                .toArray()
                 res.send(result)
             }
             catch (error) {
                 res.send({ error: true, message: error.message });
             }
         })
+
+        app.get('/mealsCount', async(req, res)=>{
+            const count = await menuCollection.estimatedDocumentCount();
+            res.send({count})
+        }) 
 
         app.get('/mealDistributor', async (req, res) => {
             const email = req.query.email;
